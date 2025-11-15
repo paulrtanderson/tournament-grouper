@@ -62,21 +62,29 @@ def load_manual_additions(script_dir: str) -> pd.DataFrame:
 
 
 def verify_charity_signups(script_dir: str, attendance_names: Set[str]) -> None:
-    """Verify that all charity signup names are present in attendance."""
-    charity_signups_path = os.path.join(script_dir, "data", "charity-signups.csv")
-    if os.path.exists(charity_signups_path):
-        charity_df = pd.read_csv(charity_signups_path)
-        charity_names = set(charity_df.iloc[:, 1].dropna())
+    """Verify that all charity signup names are present in attendance.
+    Only processes entries where product_name contains 'Tournament'.
+    """
+    purchasers_path = os.path.join(script_dir, "data", "Product Purchasers Report (System).csv")
+    if os.path.exists(purchasers_path):
+        # Read the CSV file, skipping the first 3 header rows
+        purchasers_df = pd.read_csv(purchasers_path, skiprows=3)
+        
+        # Filter to only tournament-related purchases
+        tournament_purchases = purchasers_df[purchasers_df['product_name'].str.contains('Tournament', na=False)]
+        
+        # Get unique names from the purchaser column
+        charity_names = set(tournament_purchases['purchaser'].dropna())
         
         missing_from_attendance = charity_names - attendance_names
         if missing_from_attendance:
             raise ValueError(
-                f"Error: The following names from 'charity-signups.csv' are missing from attendance: "
+                f"Error: The following names from tournament purchases are missing from attendance: "
                 f"{', '.join(sorted(missing_from_attendance))}"
             )
-        print(f"Verified: All {len(charity_names)} names from 'charity-signups.csv' are present in attendance.")
+        print(f"Verified: All {len(charity_names)} tournament purchaser names are present in attendance.")
     else:
-        print("Warning: 'charity-signups.csv' not found. Skipping charity signups verification.")
+        print("Warning: 'Product Purchasers Report (System).csv' not found. Skipping charity signups verification.")
 
 
 def apply_ability_changes(script_dir: str, df: pd.DataFrame) -> pd.DataFrame:
@@ -98,7 +106,7 @@ def apply_ability_changes(script_dir: str, df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def save_attendance_data(df: pd.DataFrame, output_path: str = "attendance.csv") -> None:
+def save_attendance_data(df: pd.DataFrame, output_path: str = "build/attendance.csv") -> None:
     """Save the processed data to CSV file."""
     df.to_csv(output_path, index=False)
     print(f"Processed data saved to '{output_path}'.")

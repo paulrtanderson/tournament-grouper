@@ -3,7 +3,7 @@ import numpy as np
 import os
 from math import ceil
 
-def create_tournament_groups(attendance_file='attendance.csv', pairs_file='paired.csv', output_file='tournament_groups.csv'):
+def create_tournament_groups(attendance_file='build/attendance.csv', pairs_file='data/paired.csv', output_file='build/tournament_groups.csv'):
     """
     Create tournament groups from attendance data and optional pairs information.
     
@@ -21,7 +21,7 @@ def create_tournament_groups(attendance_file='attendance.csv', pairs_file='paire
     # Load attendance data
     attendance_df = pd.read_csv(attendance_file)
     
-    REQUIRE_ATTENDENCE = False  # TESTING ONLY SET TO TRUE WHEN ACTUALLY USING THIS
+    REQUIRE_ATTENDENCE = True  # TESTING ONLY SET TO TRUE WHEN ACTUALLY USING THIS
     
     # Filter to only include players who are attending
     
